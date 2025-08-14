@@ -21,6 +21,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y nuclei
+          nuclei -update-templates
           pip install -r requirements.txt
           
       - name: Run Vulnerability Scanner
