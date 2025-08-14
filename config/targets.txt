@@ -1,1 +1,1 @@
-*.hpe.com
+hpe.com
