@@ -13,26 +13,24 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Nuclei
-        run: |
-          # Cài đặt dependencies
-          sudo apt update
-          sudo apt install -y jq unzip
-      
-          # Tải Nuclei bản mới nhất từ GitHub Releases
-          NUCLEI_VERSION=$(curl -s https://api.github.com/repos/projectdiscovery/nuclei/releases/latest | jq -r .tag_name)
-          wget "https://github.com/projectdiscovery/nuclei/releases/download/${NUCLEI_VERSION}/nuclei_${NUCLEI_VERSION:1}_linux_amd64.zip"
+         run: |
+           sudo apt update
+           sudo apt install -y jq unzip
     
-          # Giải nén và cài đặt
-          unzip nuclei_${NUCLEI_VERSION:1}_linux_amd64.zip
-          chmod +x nuclei
-          sudo mv nuclei /usr/local/bin/
+           # Tải và cài đặt nuclei mà không cần giải nén README
+           NUCLEI_VERSION=$(curl -s https://api.github.com/repos/projectdiscovery/nuclei/releases/latest | jq -r .tag_name)
+           wget -q "https://github.com/projectdiscovery/nuclei/releases/download/${NUCLEI_VERSION}/nuclei_${NUCLEI_VERSION:1}_linux_amd64.zip" -O nuclei.zip
     
-          # Cài đặt templates
-          nuclei -update-templates
+           # Chỉ giải nén file thực thi
+           unzip -j nuclei.zip nuclei -d /tmp
+           chmod +x /tmp/nuclei
+           sudo mv /tmp/nuclei /usr/local/bin/
     
-          # Kiểm tra
-          nuclei -version
-
+           # Cleanup
+          rm nuclei.zip
+    
+           # Verify
+           nuclei -version
       - name: Run Scan
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
