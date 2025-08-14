@@ -6,6 +6,11 @@ from llm_processor import generate_report
 from telegram_bot import send_report
 import subprocess
 import sys
+import shutil
+
+def check_nuclei_installed():
+    if not shutil.which("nuclei"):
+        raise Exception("❌ Nuclei chưa được cài đặt! Hãy chạy lệnh: 'curl -sL https://raw.githubusercontent.com/projectdiscovery/nuclei/v3/bin/install.sh | sh'")
 
 def scan_target(target):
     try:
