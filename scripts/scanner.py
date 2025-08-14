@@ -4,6 +4,25 @@ import requests
 from utils import load_targets, save_results
 from llm_processor import generate_report
 from telegram_bot import send_report
+import subprocess
+import sys
+
+def scan_target(target):
+    try:
+        cmd = f"nuclei -u {target} -t config/nuclei-templates/ -json -o results/{target.replace('://', '_')}.json"
+        result = subprocess.run(
+            cmd,
+            shell=True,
+            check=True,  # Tự động raise exception nếu lỗi
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        print(f"✅ Scan thành công: {target}")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Lỗi khi scan {target}:")
+        print(e.stderr)
+        sys.exit(1)  # Dừng luồng nếu lỗi nghiêm trọng
 
 def scan_target(target):
     """Scan a single target using Nuclei"""
