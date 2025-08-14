@@ -5,31 +5,28 @@ on:
     - cron: '0 2 * * *'  # Run daily at 2AM UTC
   workflow_dispatch:      # Manual trigger
   
+name: Nuclei Scan
+
+on: [workflow_dispatch]
+
 jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
+      
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      
       - name: Install Nuclei
         run: |
-          # Cài đặt Go trước
-          sudo apt-get update
-          sudo apt-get install -y golang jq
-    
-          # Cài đặt Nuclei qua Go
           go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
-    
-          # Thêm vào PATH
           echo "$HOME/go/bin" >> $GITHUB_PATH
-    
-           # Kiểm tra
-           nuclei -version
-    
+          nuclei -update-templates
+          
       - name: Run Scan
-        env:
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
-          python scripts/scanner.py
+          nuclei -u https://example.com -silent -json -o results.json
+          cat results.json
